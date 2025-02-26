@@ -33,18 +33,16 @@ export default new Transformer({
     }
   },
   async transform({ asset, config }) {
-    let code = await asset.getCode();
+    const raw = await asset.getCode();
     const option: { marked?: marked.MarkedOptions, html?: Boolean } = config || {};
+    let code = raw;
     if (option.marked) {
       code = marked.parse(code, { ...option.marked });
     }
-    if (option.html && option.marked) {
-      asset.type = 'html';
-      asset.setCode(code);
-    } else {
-      asset.type = 'js';
-      asset.setCode(`export default ${JSON.stringify(code)}`);
-    }
+
+    asset.type = 'js';
+    asset.setCode(`export default ${JSON.stringify(code)}; export const raw = ${JSON.stringify(raw)}`);
+
     return [asset];
   },
 });
